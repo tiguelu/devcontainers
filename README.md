@@ -43,7 +43,7 @@ Clone this repo or a fork, to use the dev containers it contains. The tree in th
 Add the full path of the locally cloned repo in your host to the global settings: **Remote > Containers: Repository Configuration Paths**.
 
 Specific Dev Containers doc:
-* [ARO-RP](github.com/Azure/ARO-RP/)
+* [ARO-RP](github.com/Azure/ARO-RP/.devcontainer)
 
 
 ## Links

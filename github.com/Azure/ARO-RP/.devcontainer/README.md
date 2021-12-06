@@ -1,6 +1,6 @@
 # ARO RP Dev Container
 
-It automates the [steps to prepare your dev environment](https://github.com/Azure/ARO-RP/blob/master/docs/prepare-your-dev-environment.md) in a Fedora container, plus part of the env setup through tasks and launch confiurations.
+It automates the [steps to prepare your dev environment](https://github.com/Azure/ARO-RP/blob/master/docs/prepare-your-dev-environment.md) in a Fedora container for the [ARO-RP repo](https://github.com/Azure/ARO-RP/), plus part of the env setup through tasks and launch confiurations.
 
 It also contains the required VSCode extensions for the ARO-RP, the Golang debugging tools used by the Go extension and some other dev tools (oc, az, etc)
 
