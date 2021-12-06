@@ -1,0 +1,31 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Devcontainer: AZ login",
+            "type": "shell",
+            "problemMatcher": [],
+            "command": "az account list-locations > /dev/null 2>&1 || az login"
+        },
+        {
+            "dependsOn": ["Devcontainer: AZ login"],
+            "label": "Devcontainer: Make secrets",
+            "type": "shell",
+            "problemMatcher": [],
+            "command": "SECRET_SA_ACCOUNT_NAME=rharosecrets make secrets"
+        },
+        {
+            "dependsOn": ["Devcontainer: Make secrets"],
+            "label": "Devcontainer: Create env file",
+            "type": "shell",
+            "problemMatcher": [],
+            "command": "[[ ! -f env ]] && cp env.example env && env -i bash -c 'source ./env; env' > env.devcontainer"
+        },
+        {
+            "label": "Devcontainer: get commit",
+            "type": "shell",
+            "problemMatcher": [],
+            "command": "export COMMIT=$(git rev-parse --short=7 HEAD)"
+        }
+    ]
+}

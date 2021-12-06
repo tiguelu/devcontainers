@@ -1,0 +1,52 @@
+FROM registry.fedoraproject.org/fedora:34
+
+RUN rpm --import https://packages.microsoft.com/keys/microsoft.asc \
+    && echo -e "[azure-cli]\nname=Azure CLI\nbaseurl=https://packages.microsoft.com/yumrepos/azure-cli\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/azure-cli.repo \
+    && dnf -y update \
+    && dnf -y install go python-setuptools python-virtualenv gpgme-devel libassuan-devel openssl openvpn \
+    && dnf -y install azure-cli \
+    && dnf -y install iputils procps-ng jq pip
+
+ARG RPDIR=/ARO-RP
+ARG USERNAME=overriden-in-devcontainer-json
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
+ARG HOMEDIR=/home/$USERNAME
+RUN groupadd --gid $USER_GID $USERNAME \
+    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME
+
+# Uncomment these lines to get passwordless sudo inside the container
+# RUN echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
+# && chmod 0440 /etc/sudoers.d/$USERNAME
+
+USER $USERNAME
+WORKDIR $HOMEDIR
+
+# Tools used by the Go extension in VSCode
+RUN go get -v github.com/ramya-rao-a/go-outline \
+    && go get -v golang.org/x/tools/gopls \
+    && go get -v github.com/uudashr/gopkgs/v2/cmd/gopkgs \
+    && go get -v github.com/go-delve/delve/cmd/dlv \
+    && go get -v honnef.co/go/tools/cmd/staticcheck \
+    && mkdir -p $HOMEDIR/tmp/dap \
+    && cd $HOMEDIR/tmp/dap \
+    && go mod init local/build \
+    && go get -v -d github.com/go-delve/delve/cmd/dlv@master \
+    && go build -o $HOMEDIR/go/bin/dlv-dap github.com/go-delve/delve/cmd/dlv \
+    && cd $HOMEDIR \
+    && rm -rf $HOMEDIR/tmp/dap
+
+COPY .devcontainer/bash_prompt .devcontainer/tasks.json $HOMEDIR/tmp/
+RUN cat $HOMEDIR/tmp/bash_prompt >> $HOMEDIR/.bashrc \
+    # Other things that need to go in .bashrc so it can use the /ARO-RP mount point
+    && echo "[[ -f $RPDIR/env ]] && source $RPDIR/env" >> $HOMEDIR/.bashrc \
+    && echo "[[ -d $RPDIR/.vscode ]] && [[ ! -f $RPDIR/.vscode/tasks.json ]] && cp $HOMEDIR/.vscode-server/data/Machine/tasks.json $RPDIR/.vscode/" >> $HOMEDIR/.bashrc \
+    # Installs oc and kubectl for the remote user
+    && mkdir -p $HOMEDIR/.local/bin \
+    && curl https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz | tar -C $HOMEDIR/.local/bin -zxf - \
+    # This installs jsonlint in user space (useful to standardize jsons for jq consumption)
+    && pip install --user demjson \
+    && mkdir -p $HOMEDIR/.vscode-server/data/Machine/ \
+    && cp $HOMEDIR/tmp/tasks.json $HOMEDIR/.vscode-server/data/Machine/ \
+    && rm -rf $HOMEDIR/tmp
+

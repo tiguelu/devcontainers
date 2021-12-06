@@ -1,0 +1,64 @@
+// For format details, see https://aka.ms/devcontainer.json
+{
+	"name": "ARO-RP",
+	"workspaceFolder": "/ARO-RP",
+	"build": {
+		"dockerfile": "Containerfile",
+		"context": "..",
+		"args": {			
+			"RPDIR": "${containerWorkspaceFolder}",
+			"USERNAME": "mabad",
+			// "USERNAME": "${localEnv:USER}",
+		}
+	},
+
+	// env.devcontainer will be used for debugging. If it doesn't exist and env exists, it will be created
+	"postStartCommand": "( [[ -f env ]] && [[ ! -f env.devcontainer ]] && env -i bash -c 'source ./env; env' > env.devcontainer ) || true",
+	// Set *default* container specific settings.json values on container create.
+	"settings": {
+		"launch": {
+			"version": "0.2.0",
+			"configurations": [
+				{
+					"name": "rp",
+					"type": "go",
+					"request": "launch",
+					"mode": "debug",
+					"preLaunchTask": {
+						"task": "Devcontainer: get commit",
+						"type": "shell"
+					},
+					"program": "${workspaceFolder}/cmd/aro/",
+					"envFile": "${workspaceFolder}/env.devcontainer",
+					"buildFlags": "-tags aro,containers_image_openpgp,codec.safe -ldflags '-X github.com/Azure/ARO-RP/pkg/util/version.GitCommit=$COMMIT'",
+					"args": [ "rp" ],
+					"showLog": true
+				},
+			]
+		}
+	},
+
+	// Add the IDs of extensions you want installed when the container is created.
+	"extensions": [
+		"eamodio.gitlens",
+		"golang.go",
+		"docsmsft.docs-markdown",
+		"streetsidesoftware.code-spell-checker",
+		"ms-vscode.makefile-tools",
+	],
+
+	// List of ports from the RP inside the container also available in the host.
+	"forwardPorts": [8443],
+
+	// Needed when using a ptrace-based debugger like C++, Go, and Rust
+	"runArgs": ["--userns=keep-id", "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined"],
+	"workspaceMount": "source=${localWorkspaceFolder},target=${containerWorkspaceFolder},type=bind,Z",
+
+	// By default use the same username as in the host. 
+	// If manually changed, the build USERNAME param needs to change too (in the top of the file)
+	"containerUser": "mabad",
+	"remoteUser": "mabad",
+	// "containerUser": "${localEnv:USER}",
+	// "remoteUser": "${localEnv:USER}",
+	"updateRemoteUserUID": true,
+}
