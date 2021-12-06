@@ -7,8 +7,7 @@
 		"context": "..",
 		"args": {			
 			"RPDIR": "${containerWorkspaceFolder}",
-			"USERNAME": "mabad",
-			// "USERNAME": "${localEnv:USER}",
+			"USERNAME": "${localEnv:USER}",
 		}
 	},
 
@@ -56,9 +55,7 @@
 
 	// By default use the same username as in the host. 
 	// If manually changed, the build USERNAME param needs to change too (in the top of the file)
-	"containerUser": "mabad",
-	"remoteUser": "mabad",
-	// "containerUser": "${localEnv:USER}",
-	// "remoteUser": "${localEnv:USER}",
+	"containerUser": "${localEnv:USER}",
+	"remoteUser": "${localEnv:USER}",
 	"updateRemoteUserUID": true,
 }
