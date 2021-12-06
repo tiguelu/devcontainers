@@ -23,13 +23,14 @@
 					"type": "go",
 					"request": "launch",
 					"mode": "debug",
-					"preLaunchTask": {
-						"task": "Devcontainer: get commit",
-						"type": "shell"
-					},
+					// "preLaunchTask": {
+					// 	"task": "Devcontainer: get commit",
+					// 	"type": "shell"
+					// },
 					"program": "${workspaceFolder}/cmd/aro/",
 					"envFile": "${workspaceFolder}/env.devcontainer",
-					"buildFlags": "-tags aro,containers_image_openpgp,codec.safe -ldflags '-X github.com/Azure/ARO-RP/pkg/util/version.GitCommit=$COMMIT'",
+					"buildFlags": "-tags aro,containers_image_openpgp,codec.safe -ldflags '-X github.com/Azure/ARO-RP/pkg/util/version.GitCommit=devcontainer'",
+					// "buildFlags": "-tags aro,containers_image_openpgp,codec.safe -ldflags '-X github.com/Azure/ARO-RP/pkg/util/version.GitCommit=$COMMIT'",
 					"args": [ "rp" ],
 					"showLog": true
 				},
