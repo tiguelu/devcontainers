@@ -1,0 +1,6 @@
+# Configs that need to run from .bashrc because they require the ARO-RP code volume to be mounted
+cd $RPDIR
+
+[[ -f $RPDIR/env ]] && source $RPDIR/env
+
+[[ -d $RPDIR/.vscode ]] && [[ ! -f $RPDIR/.vscode/tasks.json ]] && cp $HOMEDIR/.vscode-server/data/Machine/tasks.json $RPDIR/.vscode/

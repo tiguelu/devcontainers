@@ -36,17 +36,22 @@ RUN go get -v github.com/ramya-rao-a/go-outline \
     && cd $HOMEDIR \
     && rm -rf $HOMEDIR/tmp/dap
 
-COPY .devcontainer/bash_prompt .devcontainer/tasks.json $HOMEDIR/tmp/
-RUN cat $HOMEDIR/tmp/bash_prompt >> $HOMEDIR/.bashrc \
-    # Other things that need to go in .bashrc so it can use the /ARO-RP mount point
-    && echo "[[ -f $RPDIR/env ]] && source $RPDIR/env" >> $HOMEDIR/.bashrc \
-    && echo "[[ -d $RPDIR/.vscode ]] && [[ ! -f $RPDIR/.vscode/tasks.json ]] && cp $HOMEDIR/.vscode-server/data/Machine/tasks.json $RPDIR/.vscode/" >> $HOMEDIR/.bashrc \
+# $USER is required by RP env files but it is not set in non-login sessions (e.g. when -l is not specified when podman exec bash)
+# Explicitly setting it here to avoid failures with RP in non-login sessions
+ENV USER $USERNAME
+# $RPDIR will be used in .bashrc
+ENV RPDIR $RPDIR
+
+COPY .devcontainer/bash_* $HOMEDIR/tmp/
+RUN cat $HOMEDIR/tmp/bash_* >> $HOMEDIR/.bashrc \
     # Installs oc and kubectl for the remote user
     && mkdir -p $HOMEDIR/.local/bin \
     && curl https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz | tar -C $HOMEDIR/.local/bin -zxf - \
     # This installs jsonlint in user space (useful to standardize jsons for jq consumption)
-    && pip install --user demjson \
-    && mkdir -p $HOMEDIR/.vscode-server/data/Machine/ \
+    && pip install --user demjson
+
+COPY .devcontainer/tasks.json $HOMEDIR/tmp/
+RUN mkdir -p $HOMEDIR/.vscode-server/data/Machine/ \
     && cp $HOMEDIR/tmp/tasks.json $HOMEDIR/.vscode-server/data/Machine/ \
     && rm -rf $HOMEDIR/tmp
 
